@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Random;
 
 
 public class Bee implements Runnable {
@@ -30,7 +31,12 @@ public class Bee implements Runnable {
         try {
             while (true) {
                 if (this.ifIn()) {
-                    Thread.sleep(1000);
+                    //in beehive
+                    Random r = new Random();
+                    int minInTime = 1000;
+                    int maxInTime = 5000;
+                    int inTime = r.nextInt(maxInTime - minInTime) + minInTime;
+                    Thread.sleep(inTime);
                     System.out.println("Bee " + this.ID + " comes near entrance 1");
                     if (this.hive.getIf1EntranceFree()) {
 
@@ -48,10 +54,10 @@ public class Bee implements Runnable {
                             synchronized (hive.if2EntranceFree) {
                                 hive.if2EntranceFree = false;
                                 Thread.sleep(1000);
-                                this.inOrOut = true;
+                                this.inOrOut = false;
                                 System.out.println("Bee " + this.ID + " leaves the beehive through entrance no 2");
                                 numOfFlights++;
-                                hive.if2EntranceFree = false;
+                                hive.if2EntranceFree = true;
                             }
                         }
                         System.out.println("Bee " + this.ID + " waits near entrance 2");
@@ -59,18 +65,22 @@ public class Bee implements Runnable {
                         synchronized (hive.if2EntranceFree) {
                             hive.if2EntranceFree = false;
                             Thread.sleep(1000);
-                            this.inOrOut = true;
+                            this.inOrOut = false;
                             System.out.println("Bee " + this.ID + " leaves the beehive through entrance no 2");
                             numOfFlights++;
-                            hive.if2EntranceFree = false;
+                            hive.if2EntranceFree = true;
                         }
                         SumWaitingTime += System.nanoTime() - timeBefore;
 
                     }
 
                 } else {
-                    Thread.sleep(5000);
-
+                    //outside the beehive
+                    Random r = new Random();
+                    int minOutTime = 5000;
+                    int maxOutTime = 10000;
+                    int OutTime = r.nextInt(maxOutTime - minOutTime) + minOutTime;
+                    Thread.sleep(OutTime);
                     System.out.println("Bee " + this.ID + " comes near entrance 1");
                     if (this.hive.getIf2EntranceFree()) {
                         synchronized (hive.if1EntranceFree) {
@@ -79,7 +89,7 @@ public class Bee implements Runnable {
                             this.inOrOut = true;
                             System.out.println("Bee " + this.ID + " enters the beehive through entrance no 1");
                             numOfFlights++;
-                            hive.if1EntranceFree = false;
+                            hive.if1EntranceFree = true;
                         }
                     } else {
                         if (this.hive.getIf2EntranceFree()) {
@@ -87,10 +97,10 @@ public class Bee implements Runnable {
                             synchronized (hive.if1EntranceFree) {
                                 hive.if2EntranceFree = false;
                                 Thread.sleep(1000);
-                                this.inOrOut = false;
+                                this.inOrOut = true;
                                 System.out.println("Bee " + this.ID + " enters the beehive through entrance no 2");
                                 numOfFlights++;
-                                hive.if2EntranceFree = false;
+                                hive.if2EntranceFree = true;
                             }
                         } else {
                             System.out.println("Bee " + this.ID + " waits near entrance 2");
@@ -101,7 +111,7 @@ public class Bee implements Runnable {
                                 this.inOrOut = true;
                                 System.out.println("Bee " + this.ID + " enters the beehive through entrance no 2");
                                 numOfFlights++;
-                                hive.if2EntranceFree = false;
+                                hive.if2EntranceFree = true;
                             }
                             SumWaitingTime += System.nanoTime() - timeBefore;
                         }
@@ -109,7 +119,7 @@ public class Bee implements Runnable {
                 }
             }
         } catch (InterruptedException e) {
-            String results = "Bee " + ID + " number of flights: " + numOfFlights + " average waiting time: " + SumWaitingTime / numOfFlights;
+            String results = "Bee " + ID + " number of flights: " + numOfFlights + " average waiting time[s]: " + SumWaitingTime / numOfFlights / 1_000_000_000;
             System.out.println(results);
             resultsArr.saveToList(results);
             if(ID == 0) {
